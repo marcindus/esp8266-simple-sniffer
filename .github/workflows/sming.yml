@@ -1,0 +1,38 @@
+
+name: Compile Sming example
+
+on: [push, pull_request]
+jobs:
+  Basic_Blink:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@master
+    - name: Install build system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y make unrar autoconf automake libtool libtool-bin gcc g++ gperf \
+          flex bison texinfo gawk ncurses-dev libexpat1-dev python sed python-serial \
+          python-dev srecord bc git help2man unzip bzip2
+    - name: Install Sming library
+      run: |
+        git clone -b master https://github.com/SmingHub/Sming.git
+        export SMING_HOME=$GITHUB_WORKSPACE/Sming/Sming
+    - name: Install ESP SDK
+      run: |
+        export ESP_HOME="$GITHUB_WORKSPACE/esp-quick-toolchain"
+        mkdir -p $ESP_HOME
+        wget https://github.com/SmingHub/SmingTools/releases/download/1.0/x86_64-linux-gnu.xtensa-lx106-elf-e6a192b.201211.tar.gz
+        tar -zxf x86_64-linux-gnu.xtensa-lx106-elf-e6a192b.201211.tar.gz -C $ESP_HOME
+    - name: Checks
+      run: |
+        pwd
+        ls -al $GITHUB_WORKSPACE
+        python --version
+        env
+    - name: Build
+      run: |
+        export SMING_HOME=$GITHUB_WORKSPACE/Sming/Sming
+        export ESP_HOME="$GITHUB_WORKSPACE/esp-quick-toolchain"
+        cd Sming/samples/Basic_Blink
+        make
